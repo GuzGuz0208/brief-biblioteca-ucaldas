@@ -132,25 +132,7 @@ Prestamo 0..1 --- 1 Multa
 
 ---
 
-## 7. Preguntas pendientes para la cliente
-
-[A Diana Restrepo, ¿qué le preguntarías? Mínimo 3 preguntas]
-
-1. [Pregunta concreta, no vaga]
-2. [...]
-3. [...]
-
-**Ejemplo de pregunta concreta:**
-
-> "Cuando un estudiante de pregrado pasa a posgrado a mitad del semestre, su límite de préstamos pasa de 3 a 5. Si en ese momento ya tiene 4 préstamos activos (lo cual no era posible cuando era pregrado pero sí lo es ahora como posgrado), ¿el sistema debe aceptar préstamos adicionales hasta el nuevo límite, o congelar los préstamos hasta que devuelva alguno?"
-
-**Ejemplo de pregunta vaga (a evitar):**
-
-> "¿Cómo manejamos los cambios de programa?"
-
----
-
-## 8. Códigos HTTP usados
+## 7. Códigos HTTP usados
 
 | Código | Significado | Cuándo se usa |
 |---|---|---|
@@ -161,11 +143,10 @@ Prestamo 0..1 --- 1 Multa
 | 409 | Conflict | Reglas de negocio violadas (límite alcanzado, duplicado, etc.) |
 | 500 | Internal Server Error | Error no controlado del servidor |
 
-[Si usas otros, agrégalos.]
 
 ---
 
-## 9. Restricciones técnicas
+## 8. Restricciones técnicas
 
 - **Stack:** [Node.js + Express / Python + FastAPI / etc.]
 - **Persistencia:** datos en memoria. No usar base de datos.

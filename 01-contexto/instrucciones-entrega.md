@@ -42,7 +42,6 @@ Cada archivo debe tener:
 - **Resumen de la respuesta** de la IA (no la respuesta completa, solo qué hizo).
 - **Tu evaluación:** ¿la respuesta fue útil? ¿la aceptaste tal cual? ¿la modificaste?
 
-**El docente va a leer estos prompts.** Son la evidencia más clara de que pensaste antes de pedir.
 
 Plantilla en `02-tu-trabajo/plantilla-prompts.md`.
 
@@ -60,8 +59,6 @@ proyecto/
 ├── rutas/
 └── ...
 ```
-
-**Importante:** la carpeta `node_modules/` o equivalente no se entrega. Solo el código fuente y el archivo de dependencias.
 
 El proyecto debe poder arrancarse con un comando estándar (`npm start`, `uvicorn main:app`, etc.) y debe estar **funcionando** al momento de la entrega.
 
@@ -88,20 +85,8 @@ Plantilla en `02-tu-trabajo/plantilla-bitacora.md`.
 
 ---
 
-## 6. `diff-de-correcciones.md`
 
-Una tabla mínima donde declaras qué cambios fueron tuyos a mano y cuáles le pediste a la IA:
-
-| # | Archivo y línea | Cambio | ¿Por IA o por mí? | Razón |
-|---|---|---|---|---|
-| 1 | rutas/prestamos.js línea 45 | Cambio de `>=` a `>` en validación de fecha | Por mí | La IA no entendía la sutileza del boundary inclusivo |
-| 2 | modelos/prestamo.js línea 80 | Agregar validación de tipo de libro | Por IA | Le pedí explícitamente con un prompt |
-
-Esta tabla muestra que **no estás vibe-codeando ciegamente**: hay decisiones humanas conscientes en el flujo.
-
----
-
-## 7. `reflexion-final.md`
+## 6. `reflexion-final.md`
 
 Tres preguntas para responder en máximo 1 página:
 
@@ -111,20 +96,6 @@ Tres preguntas para responder en máximo 1 página:
 
 3. **Si mañana tu jefe te dice "no necesitamos QA, la IA ya genera tests", ¿qué le contestas?** Argumenta usando lo que aprendiste hoy. No respondas con generalidades; usa un ejemplo concreto del taller.
 
----
-
-## Defensa oral (3 minutos al final)
-
-Cuando entregues, el docente va a:
-
-- Abrir tu proyecto y arrancarlo en su computador (no en el tuyo).
-- Hacer 1 o 2 llamados a la API para confirmar que funciona.
-- Señalar **cualquier línea del código** y pedirte que la expliques.
-- Hacerte 1 pregunta de la `reflexion-final.md` y escuchar tu respuesta.
-
-Esta defensa es donde se distingue al estudiante que entendió del que solo ejecutó. Si no puedes explicar una línea, esa línea cuenta como código que no es tuyo.
-
----
 
 ## Resumen visual de la entrega
 
