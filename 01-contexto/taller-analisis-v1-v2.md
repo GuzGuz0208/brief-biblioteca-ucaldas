@@ -197,3 +197,4 @@ it('RN1 — posgrado falla al intentar el sexto préstamo', async () => {
 
 Una vez terminado, reflexiona: ¿por qué sería más lento o difícil escribir este test en v1?
 
+
