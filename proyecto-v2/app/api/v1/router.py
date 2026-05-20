@@ -1,10 +1,18 @@
 from fastapi import APIRouter, HTTPException, Query
-from typing import Optional, List
-from app.services.biblioteca_service import BibliotecaService, BibliotecaException
-from app.repositories.memory import MemoryRepository
+from typing import Optional
 
-# Inicializar repositorio global
-repo = MemoryRepository()
+from app.services.biblioteca_service import BibliotecaService, BibliotecaException
+from app.repositories.sqlite import SqliteRepository
+
+# Modelos para recibir bodies
+from app.models.libro import LibroCreate
+from app.models.ejemplar import EjemplarCreate
+from app.models.estudiante import EstudianteCreate
+from app.models.prestamo import PrestamoCreate
+from app.models.reserva import ReservaCreate
+
+# Inicializar repositorio global (creará un archivo biblioteca.db automáticamente)
+repo = SqliteRepository()
 service = BibliotecaService(repo)
 
 router = APIRouter(prefix="/api/v1", tags=["biblioteca"])
@@ -13,30 +21,48 @@ router = APIRouter(prefix="/api/v1", tags=["biblioteca"])
 # ============ LIBROS ============
 
 @router.post("/libros", status_code=201)
-def crear_libro(
-    id_libro: str,
-    titulo: str,
-    autor: str,
-    sala: str,
-    alta_demanda: bool
-):
-    """Registra un nuevo libro en el catálogo."""
+def crear_libro(libro: LibroCreate):
+    """Registra un nuevo libro en el catálogo (body JSON)."""
     try:
-        return service.registrar_libro(id_libro, titulo, autor, sala, alta_demanda)
+        return service.registrar_libro(libro.id_libro, libro.titulo, libro.autor, libro.sala, libro.alta_demanda)
     except BibliotecaException as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        # Mapear códigos de negocio: 403 -> 409, 404 -> 404, else usar status si viene
+        status = getattr(e, 'status_code', None)
+        if status == 404:
+            code = 404
+        elif status == 403:
+            code = 409
+        else:
+            code = status or 400
+
+        # Construir mensaje claro en formato JSON: HTTPException devuelve {"detail": ...}
+        msg = e.message if hasattr(e, 'message') else str(e)
+        if getattr(e, 'data', None):
+            # Incluir datos adicionales en el mensaje
+            msg = f"{msg} | detalles: {e.data}"
+
+        raise HTTPException(status_code=code, detail=msg) from e
 
 
 @router.post("/ejemplares", status_code=201)
-def crear_ejemplar(
-    codigo_inventario: str,
-    id_libro: str
-):
-    """Registra un nuevo ejemplar."""
+def crear_ejemplar(ejemplar: EjemplarCreate):
+    """Registra un nuevo ejemplar (body JSON)."""
     try:
-        return service.registrar_ejemplar(codigo_inventario, id_libro)
+        return service.registrar_ejemplar(ejemplar.codigo_inventario, ejemplar.id_libro)
     except BibliotecaException as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        status = getattr(e, 'status_code', None)
+        if status == 404:
+            code = 404
+        elif status == 403:
+            code = 409
+        else:
+            code = status or 400
+
+        msg = e.message if hasattr(e, 'message') else str(e)
+        if getattr(e, 'data', None):
+            msg = f"{msg} | detalles: {e.data}"
+
+        raise HTTPException(status_code=code, detail=msg) from e
 
 
 @router.get("/libros")
@@ -57,22 +83,32 @@ def obtener_libro(id_libro: str):
     try:
         return service.obtener_libro(id_libro)
     except BibliotecaException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 # ============ ESTUDIANTES ============
 
 @router.post("/estudiantes", status_code=201)
-def crear_estudiante(
-    codigo_estudiante: str,
-    nombre: str,
-    nivel: str  # "PREGRADO" o "POSGRADO"
-):
-    """Registra un nuevo estudiante."""
+def crear_estudiante(estudiante: EstudianteCreate):
+    """Registra un nuevo estudiante (body JSON)."""
     try:
-        return service.registrar_estudiante(codigo_estudiante, nombre, nivel)
+        # Enviar el valor del enum (ej. "PREGRADO")
+        nivel_val = estudiante.nivel.value if hasattr(estudiante.nivel, 'value') else estudiante.nivel
+        return service.registrar_estudiante(estudiante.codigo_estudiante, estudiante.nombre, nivel_val)
     except BibliotecaException as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        status = getattr(e, 'status_code', None)
+        if status == 404:
+            code = 404
+        elif status == 403:
+            code = 409
+        else:
+            code = status or 400
+
+        msg = e.message if hasattr(e, 'message') else str(e)
+        if getattr(e, 'data', None):
+            msg = f"{msg} | detalles: {e.data}"
+
+        raise HTTPException(status_code=code, detail=msg) from e
 
 
 @router.get("/estudiantes/{codigo_estudiante}/historial")
@@ -81,16 +117,13 @@ def obtener_historial_estudiante(codigo_estudiante: str):
     try:
         return service.obtener_historial_estudiante(codigo_estudiante)
     except BibliotecaException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 # ============ PRÉSTAMOS ============
 
 @router.post("/prestamos", status_code=201)
-def solicitar_prestamo(
-    codigo_estudiante: str,
-    codigo_inventario: str
-):
+def solicitar_prestamo(peticion: PrestamoCreate):
     """
     Solicita un préstamo.
 
@@ -102,19 +135,22 @@ def solicitar_prestamo(
     - RN5: Cálculo dinámico del plazo de vencimiento
     """
     try:
-        return service.solicitar_prestamo(codigo_estudiante, codigo_inventario)
+        return service.solicitar_prestamo(peticion.codigo_estudiante, peticion.codigo_inventario)
     except BibliotecaException as e:
-        if hasattr(e, 'status_code') and e.status_code:
-            status = e.status_code
+        status = getattr(e, 'status_code', None)
+        if status == 404:
+            code = 404
+        elif status == 403:
+            # Normalizar bloqueos de negocio a 409 Conflict
+            code = 409
         else:
-            status = 400
+            code = status or 400
 
-        # Construir respuesta de error
-        detail = {"error": str(e)}
-        if hasattr(e, 'data') and e.data:
-            detail.update(e.data)
+        msg = e.message if hasattr(e, 'message') else str(e)
+        if getattr(e, 'data', None):
+            msg = f"{msg} | detalles: {e.data}"
 
-        raise HTTPException(status_code=status, detail=detail)
+        raise HTTPException(status_code=code, detail=msg) from e
 
 
 @router.post("/prestamos/{id_prestamo}/devolucion", status_code=200)
@@ -128,7 +164,12 @@ def registrar_devolucion(id_prestamo: str):
     try:
         return service.registrar_devolucion(id_prestamo)
     except BibliotecaException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        status = getattr(e, 'status_code', None)
+        code = status or 400
+        msg = e.message if hasattr(e, 'message') else str(e)
+        if getattr(e, 'data', None):
+            msg = f"{msg} | detalles: {e.data}"
+        raise HTTPException(status_code=code, detail=msg) from e
 
 
 @router.post("/prestamos/{id_prestamo}/renovacion", status_code=200)
@@ -142,16 +183,19 @@ def renovar_prestamo(id_prestamo: str):
     try:
         return service.renovar_prestamo(id_prestamo)
     except BibliotecaException as e:
-        if hasattr(e, 'status_code') and e.status_code:
-            status = e.status_code
+        status = getattr(e, 'status_code', None)
+        if status == 404:
+            code = 404
+        elif status == 403:
+            code = 409
         else:
-            status = 400
+            code = status or 400
 
-        detail = {"error": str(e)}
-        if hasattr(e, 'data') and e.data:
-            detail.update(e.data)
+        msg = e.message if hasattr(e, 'message') else str(e)
+        if getattr(e, 'data', None):
+            msg = f"{msg} | detalles: {e.data}"
 
-        raise HTTPException(status_code=status, detail=detail)
+        raise HTTPException(status_code=code, detail=msg) from e
 
 
 @router.get("/prestamos/vigentes")
@@ -174,18 +218,32 @@ def pagar_multa(id_multa: str):
     try:
         return service.pagar_multa(id_multa)
     except BibliotecaException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        status = getattr(e, 'status_code', None)
+        code = status or 400
+        msg = e.message if hasattr(e, 'message') else str(e)
+        if getattr(e, 'data', None):
+            msg = f"{msg} | detalles: {e.data}"
+        raise HTTPException(status_code=code, detail=msg) from e
 
 
 # ============ RESERVAS ============
 
 @router.post("/reservas", status_code=201)
-def crear_reserva(
-    codigo_estudiante: str,
-    id_libro: str
-):
-    """Crea una reserva para un libro (Decisión D2)."""
+def crear_reserva(reserva: ReservaCreate):
+    """Crea una reserva para un libro (body JSON, Decisión D2)."""
     try:
-        return service.crear_reserva(codigo_estudiante, id_libro)
+        return service.crear_reserva(reserva.codigo_estudiante, reserva.id_libro)
     except BibliotecaException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        status = getattr(e, 'status_code', None)
+        if status == 404:
+            code = 404
+        elif status == 403:
+            code = 409
+        else:
+            code = status or 400
+
+        msg = e.message if hasattr(e, 'message') else str(e)
+        if getattr(e, 'data', None):
+            msg = f"{msg} | detalles: {e.data}"
+
+        raise HTTPException(status_code=code, detail=msg) from e
