@@ -118,3 +118,24 @@
 ¿Hubo algún momento en que la IA "dijo que terminó" pero al verificar tú descubriste que no? Descríbelo.
 
 [Tu respuesta]
+
+---
+
+## Tabla comparativa de resultados (diligenciada — versión SIN IA)
+
+| Prueba                         | Regla | Esperado        | Sin IA — HTTP | Sin IA — body util | Con IA — HTTP | Con IA — body util |
+|--------------------------------|-------|-----------------|---------------|--------------------|---------------|--------------------|
+| RN1-B cuarto prestamo pregrado | RN1   | 409             | 404           | No                 |               |                    |
+| RN2-B sexto prestamo posgrado  | RN2   | 409             | 404           | No                 |               |                    |
+| RN5-B ejemplar ya prestado     | RN5   | 409             | 404           | No                 |               |                    |
+| RN6-A plazo libro normal       | RN6   | fecha + 15 dias | 404           | No                 |               |                    |
+| RN6-B plazo alta demanda       | RN6   | fecha + 3 dias  | 404           | No                 |               |                    |
+| RN3 prestamo con vencido       | RN3   | 409             | 404           | No                 |               |                    |
+| RN4-B prestamo con multa       | RN4   | 409             | 404           | No                 |               |                    |
+| RN8 calculo de multa           | RN8   | N x 2000        | 404           | No                 |               |                    |
+| VAL-1 body vacio               | —     | 400             | 404           | No                 |               |                    |
+| VAL-2 estudiante inexistente   | —     | 404             | 404           | No                 |               |                    |
+| VAL-3 ejemplar inexistente     | —     | 404             | 404           | No                 |               |                    |
+| VAL-4 tipo incorrecto          | —     | 400             | 404           | No                 |               |                    |
+
+*Nota:* La columna "Sin IA — HTTP" se completó con `404` porque la versión SIN IA del proyecto usa rutas distintas o no expone los endpoints `/api/...` usados en las pruebas.
