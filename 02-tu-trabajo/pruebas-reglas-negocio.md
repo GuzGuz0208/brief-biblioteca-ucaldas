@@ -430,10 +430,10 @@ Llena esta tabla con lo que observaste al correr cada prueba en ambas versiones.
 | VAL-4 tipo incorrecto          | —     | 400             |               |                    |  
 
 
-| Prueba                         | Regla | Esperado        | Sin IA — HTTP | Sin IA — body util | Con IA — HTTP | Con IA — body util |
-|--------------------------------|-------|-----------------|---------------|--------------------|---------------|--------------------|
-| RN1-B cuarto prestamo pregrado | RN1   | 409             |               |                    |               |                    |
-| RN2-B sexto prestamo posgrado  | RN2   | 409             |               |                    |               |                    |
+| Prueba                         | Regla | Esperado        | Con IA — HTTP | Con IA — body util | 
+|--------------------------------|-------|-----------------|---------------|--------------------|
+| RN1-B cuarto prestamo pregrado | RN1   | 409             |               |                    |           
+| RN2-B sexto prestamo posgrado  | RN2   | 409             |               |                    |           
 | RN5-B ejemplar ya prestado     | RN5   | 409             |               |                    |               
 | RN6-A plazo libro normal       | RN6   | fecha + 15 dias |               |                    |               
 | RN6-B plazo alta demanda       | RN6   | fecha + 3 dias  |               |                    |               
@@ -442,8 +442,9 @@ Llena esta tabla con lo que observaste al correr cada prueba en ambas versiones.
 | RN8 calculo de multa           | RN8   | N x 2000        |               |                    |               
 | VAL-1 body vacio               | —     | 400             |               |                    |               
 | VAL-2 estudiante inexistente   | —     | 404             |               |                    |               
-| VAL-3 ejemplar inexistente     | —     | 404             |               |                    |               |                    |
-| VAL-4 tipo incorrecto          | —     | 400             |               |                    |               |                    |
+| VAL-3 ejemplar inexistente     | —     | 404             |               |                    |            
+| VAL-4 tipo incorrecto          | —     | 400             |               |                    |      
+       
 **Columna "body util":** escribe `Si` si la respuesta incluye un mensaje que explica por que fallo, o `No` si solo devuelve el codigo sin explicacion.
 
 ---
