@@ -147,7 +147,7 @@ class SqliteRepository:
                 SELECT DISTINCT l.* FROM libros l
                 INNER JOIN ejemplares e ON l.id_libro = e.id_libro
                 WHERE e.estado = ?
-            ''', (str(EstadoEjemplar.DISPONIBLE),))
+            ''', (EstadoEjemplar.DISPONIBLE.value,))
             rows = cursor.fetchall()
             return [Libro(**dict(row)) for row in rows]
 
@@ -159,7 +159,7 @@ class SqliteRepository:
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO ejemplares (codigo_inventario, id_libro, estado) VALUES (?, ?, ?)",
-                (nuevo_ejemplar.codigo_inventario, nuevo_ejemplar.id_libro, str(nuevo_ejemplar.estado))
+                (nuevo_ejemplar.codigo_inventario, nuevo_ejemplar.id_libro, nuevo_ejemplar.estado.value)
             )
             conn.commit()
         return nuevo_ejemplar
@@ -241,7 +241,7 @@ class SqliteRepository:
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO prestamos (id_prestamo, codigo_inventario, codigo_estudiante, fecha_prestamo, fecha_vencimiento, estado, renovaciones) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (id_prestamo, prestamo.codigo_inventario, prestamo.codigo_estudiante, fecha_prestamo.isoformat(), fecha_vencimiento.isoformat(), str(EstadoPrestamo.VIGENTE), 0)
+                (id_prestamo, prestamo.codigo_inventario, prestamo.codigo_estudiante, fecha_prestamo.isoformat(), fecha_vencimiento.isoformat(), EstadoPrestamo.VIGENTE.value, 0)
             )
             conn.commit()
         return nuevo_prestamo
@@ -276,7 +276,7 @@ class SqliteRepository:
     def get_prestamos_activos_estudiante(self, codigo_estudiante: str) -> List[Prestamo]:
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM prestamos WHERE codigo_estudiante = ? AND estado = ?", (codigo_estudiante, str(EstadoPrestamo.VIGENTE)))
+            cursor.execute("SELECT * FROM prestamos WHERE codigo_estudiante = ? AND estado = ?", (codigo_estudiante, EstadoPrestamo.VIGENTE.value))
             rows = cursor.fetchall()
             prestamos = []
             for row in rows:
@@ -290,7 +290,7 @@ class SqliteRepository:
     def get_prestamos_vencidos_estudiante(self, codigo_estudiante: str) -> List[Prestamo]:
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM prestamos WHERE codigo_estudiante = ? AND estado = ?", (codigo_estudiante, str(EstadoPrestamo.VENCIDO)))
+            cursor.execute("SELECT * FROM prestamos WHERE codigo_estudiante = ? AND estado = ?", (codigo_estudiante, EstadoPrestamo.VENCIDO.value))
             rows = cursor.fetchall()
             prestamos = []
             for row in rows:
@@ -304,7 +304,7 @@ class SqliteRepository:
     def get_prestamos_vigentes(self) -> List[Prestamo]:
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM prestamos WHERE estado = ?", (str(EstadoPrestamo.VIGENTE),))
+            cursor.execute("SELECT * FROM prestamos WHERE estado = ?", (EstadoPrestamo.VIGENTE.value,))
             rows = cursor.fetchall()
             prestamos = []
             for row in rows:
@@ -318,7 +318,7 @@ class SqliteRepository:
     def get_prestamos_vencidos(self) -> List[Prestamo]:
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM prestamos WHERE estado = ?", (str(EstadoPrestamo.VENCIDO),))
+            cursor.execute("SELECT * FROM prestamos WHERE estado = ?", (EstadoPrestamo.VENCIDO.value,))
             rows = cursor.fetchall()
             prestamos = []
             for row in rows:
@@ -377,7 +377,7 @@ class SqliteRepository:
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO multas (id_multa, id_prestamo, codigo_estudiante, dias_retraso, monto_total, estado) VALUES (?, ?, ?, ?, ?, ?)",
-                (id_multa, multa.id_prestamo, multa.codigo_estudiante, multa.dias_retraso, multa.monto_total, str(EstadoMulta.PENDIENTE))
+                (id_multa, multa.id_prestamo, multa.codigo_estudiante, multa.dias_retraso, multa.monto_total, EstadoMulta.PENDIENTE.value)
             )
             conn.commit()
         return nueva_multa
@@ -401,7 +401,7 @@ class SqliteRepository:
     def get_multas_pendientes_estudiante(self, codigo_estudiante: str) -> List[Multa]:
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM multas WHERE codigo_estudiante = ? AND estado = ?", (codigo_estudiante, str(EstadoMulta.PENDIENTE)))
+            cursor.execute("SELECT * FROM multas WHERE codigo_estudiante = ? AND estado = ?", (codigo_estudiante, EstadoMulta.PENDIENTE.value))
             rows = cursor.fetchall()
             return [Multa(**dict(row)) for row in rows]
 
@@ -417,7 +417,7 @@ class SqliteRepository:
     def update_multa_pago(self, id_multa: str) -> Optional[Multa]:
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("UPDATE multas SET estado = ? WHERE id_multa = ?", (str(EstadoMulta.PAGADA), id_multa))
+            cursor.execute("UPDATE multas SET estado = ? WHERE id_multa = ?", (EstadoMulta.PAGADA.value, id_multa))
             conn.commit()
         return self.get_multa(id_multa)
 
@@ -435,7 +435,7 @@ class SqliteRepository:
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO reservas (id_reserva, codigo_estudiante, id_libro, estado) VALUES (?, ?, ?, ?)",
-                (id_reserva, reserva.codigo_estudiante, reserva.id_libro, str(EstadoReserva.ACTIVA))
+                (id_reserva, reserva.codigo_estudiante, reserva.id_libro, EstadoReserva.ACTIVA.value)
             )
             conn.commit()
         return nueva_reserva
@@ -459,7 +459,7 @@ class SqliteRepository:
     def get_reservas_activas_libro(self, id_libro: str) -> List[Reserva]:
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM reservas WHERE id_libro = ? AND estado = ?", (id_libro, str(EstadoReserva.ACTIVA)))
+            cursor.execute("SELECT * FROM reservas WHERE id_libro = ? AND estado = ?", (id_libro, EstadoReserva.ACTIVA.value))
             rows = cursor.fetchall()
             return [Reserva(**dict(row)) for row in rows]
 

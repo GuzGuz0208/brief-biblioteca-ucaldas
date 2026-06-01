@@ -60,3 +60,7 @@ uvicorn.log
 
 # SQLite database files
 *.db
+
+# Node.js — chatbot-pruebas artifacts
+node_modules/
+package-lock.json
